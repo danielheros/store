@@ -21,3 +21,6 @@ Route::get('/home', 'HomeController@index')->name('home');
 
 
 Route::resource('orders', 'OrderController');
+
+Route::get('orders/{id}/resume', 'OrderController@resume');
+Route::post('orders/{id}/payment', 'OrderController@payment');

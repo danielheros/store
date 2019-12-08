@@ -17,7 +17,9 @@ return [
   'actions' => 'Acciones',
   'pay' => 'Pagar',
   'saved_order_ok' => 'Pedido realizado correctamente.',
-  'generic_error' => 'Ha ocurrido un error, por favor vuelve a intentarlo.'
-
+  'generic_error' => 'Ha ocurrido un error, por favor vuelve a intentarlo.',
+  'resume_order' => 'Resumen del pedido',
+  'value' => 'Valor',
+  'make_payment' => 'Realizar pago'
 
 ];

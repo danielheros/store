@@ -62,15 +62,12 @@
         <td>  </td>
 
         <td>
-          <form action="/orders/payment/{{$order->id}}" method="POST">
-            @method('POST')
-            @csrf
+          <form action="/orders/{{$order->id}}/resume">
             <div class="form-group">
 
                 <button type="submit" class="btn btn-primary">
                   {{ __('messages.pay') }}
                 </button>
-
             </div>
           </form>
         </td>
