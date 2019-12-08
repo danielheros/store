@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 Use Facades\App\Order;
+Use Facades\App\Payment;
 use App\Constant;
 
 
@@ -81,7 +82,7 @@ class OrderController extends Controller
 
 
     /**
-     * Update the specified resource in storage.
+     * Show resume of the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
@@ -95,6 +96,44 @@ class OrderController extends Controller
           $order = Order::find($id);
 
           return view('customer.resume-order', compact('order') );
+
+        } catch (\Exception $e) {
+
+          \Log::info( $e );
+          return redirect( 'orders' )->with( 'warning', __('messages.generic_error') );
+
+        }
+
+    }
+
+
+
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function payment(Request $request, $id)
+    {
+
+        try {
+
+          $order = Order::find($id);
+
+          $response = Payment::processPayment($order, $request);
+
+          if($response['status']){
+
+            // Se redirecciona al cliente a la pasarela de pagos
+            return redirect()->to($response['process_url'])->send();
+
+          }else{
+            return redirect( 'orders' )->with( 'warning', __('messages.generic_error') );
+          }
+
 
         } catch (\Exception $e) {
 
