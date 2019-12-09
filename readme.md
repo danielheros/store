@@ -18,6 +18,9 @@ Generar los ficheros 'autoload' cargando las clases agregadas
 
 	composer dump-autoload
 
+Actualizar las dependencias usando composer
+
+      composer update
 
 Copiar el archivo env de ejemplo y realice los cambios de configuración necesarios en el archivo .env (definir la conexión a la base de datos)
 
@@ -27,12 +30,9 @@ Generar una nueva clave de aplicación
 
     php artisan key:generate
 
-
 Ejecutar migraciones de base de datos
 
     php artisan migrate
-
-
 
 Iniciar el servidor de desarrollo local.
 
