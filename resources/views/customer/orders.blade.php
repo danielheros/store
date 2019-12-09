@@ -36,7 +36,7 @@
   @component('components.table')
 
     @slot('columns')
-      <th> {{ __('messages.id') }}</th>
+      <th> {{ __('messages.order_id') }}</th>
       <th> {{ __('messages.status') }} </th>
       <th> {{ __('messages.order_date') }}</th>
       <th> {{ __('messages.payment_reference') }}</th>
@@ -52,11 +52,31 @@
         <td>{{ $order->status }}</td>
         <td>{{ $order->created_at }}</td>
 
-        <td>  </td>
-        <td>  </td>
+        <td>{{ $order->getPaymentReference() }}</td>
+        <td>{{ $order->getPaymentDate() }}</td>
 
-        <td class="text-nowrap">
+        <td>
 
+
+          @if( $order->status == \App\Constant::ORDER_STATUS_CREATED)
+
+            <form action="/orders/{{$order->id}}/resume">
+              <div class="form-group">
+                  <button type="submit" class="btn btn-primary">
+                    {{ __('messages.pay') }}
+                  </button>
+              </div>
+            </form>
+
+          @elseif( $order->getProcessUrlPendingPayment() )
+
+            <a href="{{ $order->getProcessUrlPendingPayment() }}">
+              <button type="button" class="btn btn-primary">
+                {{ __('messages.return_to_payment') }}
+              </button>
+            </a>
+
+          @endif
 
 
         </td>

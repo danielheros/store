@@ -22,6 +22,7 @@ class Payment extends Model
    'platform_status',
    'ip',
    'payment_code',
+   'payment_date',
    'payment_response',
    'process_url',
   ];
@@ -141,7 +142,7 @@ class Payment extends Model
 
       try {
 
-        $paymentApproved = false;
+        $paymentStatus = Constant::PAYMENT_STATUS_PENDING;
 
 
         /**
@@ -156,6 +157,7 @@ class Payment extends Model
 
         //Se envía la petición
         $response = $placetopay->query($payment->payment_code);
+
 
         // La consulta se realizó correctamente
         if ($response->isSuccessful()) {
@@ -172,36 +174,36 @@ class Payment extends Model
               $payment->payment_response = json_encode($response);
               $payment->save();
 
-
-              //Se actualiza el estado de la orden
-              switch ($response->status()->status()) {
-
-                case Constant::PAYMENT_STATUS_APPROVED:
-                    $payment->order->status = Constant::ORDER_STATUS_PAYED;
-                    $payment->order->save();
-                  break;
-
-                case Constant::PAYMENT_STATUS_REJECTED:
-                    $payment->order->status = Constant::ORDER_STATUS_REJECTED;
-                    $payment->order->save();
-                  break;
-
-              }
-
-
-              $paymentApproved = true;
+              $paymentStatus = Constant::PAYMENT_STATUS_APPROVED;
 
             }
 
 
-          }else{
-            $paymentApproved = false;
+            //Se actualiza el estado de la orden
+            switch ($response->status()->status()) {
+
+              case Constant::PAYMENT_STATUS_APPROVED:
+                  $payment->order->status = Constant::ORDER_STATUS_PAYED;
+                  $payment->order->save();
+                break;
+
+              case Constant::PAYMENT_STATUS_REJECTED:
+                  $payment->order->save();
+                  $payment->platform_status = $response->status()->status();
+                  $payment->save();
+
+                  $paymentStatus = Constant::PAYMENT_STATUS_REJECTED;
+                break;
+
+            }
+
+
           }
 
 
         }
 
-        return $paymentApproved;
+        return $paymentStatus;
 
 
       } catch (\Exception $e) {

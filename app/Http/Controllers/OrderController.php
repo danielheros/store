@@ -25,6 +25,31 @@ class OrderController extends Controller
       $filterFormated = isset( $request->filter ) ? '%' . $request->filter . '%' : '%';
 
 
+
+      $orders = Order::where( 'status', 'LIKE', $filterFormated )
+                      ->orderBy('created_at','DESC')
+                      ->paginate(10);
+
+
+      return view('customer.orders', compact('orders', 'filter') );
+
+    }
+
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function ordersAdmin(Request $request)
+    {
+
+
+      $filter = $request->filter;
+
+      $filterFormated = isset( $request->filter ) ? '%' . $request->filter . '%' : '%';
+
+
       $orders = Order::where( 'customer_name', 'LIKE', $filterFormated )
                           ->orWhere( 'customer_email', 'LIKE', $filterFormated )
                           ->orWhere( 'customer_mobile', 'LIKE', $filterFormated )
@@ -35,6 +60,8 @@ class OrderController extends Controller
       return view('admin.orders', compact('orders', 'filter') );
 
     }
+
+
 
     /**
      * Show the form for creating a new resource.
@@ -167,10 +194,25 @@ class OrderController extends Controller
             if($payment){
 
                 // Se consulta el estado de pago en la pasarela de pagos
-                $response = Payment::checkPayment($payment);
+                $paymentStatus = Payment::checkPayment($payment);
 
-                if($response){
-                    return redirect( 'orders' )->with( 'success', __('messages.approved_payment_info') );
+                switch ($paymentStatus) {
+                  case Constant::PAYMENT_STATUS_APPROVED:
+                      return redirect( 'orders' )->with( 'success', __('messages.approved_payment_info') );
+                    break;
+
+                  case Constant::PAYMENT_STATUS_PENDING:
+                      return redirect( 'orders' )->with( 'warning', __('messages.approved_payment_info') );
+                    break;
+
+                  case Constant::PAYMENT_STATUS_REJECTED:
+                      return redirect( 'orders' )->with( 'warning', __('messages.rejected_payment_info') );
+                    break;
+
+                }
+
+                if($paymentStatus){
+
                 }else{
                     return redirect( 'orders' )->with( 'warning', __('messages.pending_payment_info') );
                 }

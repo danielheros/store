@@ -12,7 +12,7 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('orders');
 });
 
 Auth::routes();
@@ -25,3 +25,4 @@ Route::resource('orders', 'OrderController');
 Route::get('orders/{id}/resume', 'OrderController@resume');
 Route::post('orders/{id}/payment', 'OrderController@payment');
 Route::get('orders/{id}/checkPayment', 'OrderController@checkPayment');
+Route::get('orders-admin', 'OrderController@ordersAdmin');
