@@ -36,42 +36,27 @@
   @component('components.table')
 
     @slot('columns')
+      <th> {{ __('messages.order_id') }}</th>
       <th> {{ __('messages.customer_name') }}</th>
       <th> {{ __('messages.customer_email') }}</th>
       <th> {{ __('messages.customer_mobile') }}</th>
-      <th> {{ __('messages.order_id') }}</th>
       <th> {{ __('messages.status') }} </th>
       <th> {{ __('messages.order_date') }}</th>
       <th> {{ __('messages.payment_reference') }}</th>
       <th> {{ __('messages.payment_date') }}</th>
-      <th class="text-nowrap">{{ __('messages.actions') }}</th>
     @endslot
 
     @foreach ($orders as $order)
 
       <tr>
-
+        <td>{{ $order->id }}</td>
         <td>{{ $order->customer_name }}</td>
         <td>{{ $order->customer_email }}</td>
         <td>{{ $order->customer_mobile }}</td>
-        <td>{{ $order->id }}</td>
         <td>{{ $order->status }}</td>
         <td>{{ $order->created_at }}</td>
-
-        <td>  </td>
-        <td>  </td>
-
-        <td>
-          <form action="/orders/{{$order->id}}/resume">
-            <div class="form-group">
-
-                <button type="submit" class="btn btn-primary">
-                  {{ __('messages.pay') }}
-                </button>
-            </div>
-          </form>
-        </td>
-
+        <td>{{ $order->getPaymentReference() }}</td>
+        <td>{{ $order->getPaymentDate() }}</td>
 
       </tr>
 
