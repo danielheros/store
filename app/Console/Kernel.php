@@ -5,6 +5,8 @@ namespace App\Console;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
+use Facades\App\Payment;
+
 class Kernel extends ConsoleKernel
 {
     /**
@@ -24,8 +26,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
+        //Consulta el estado de los pagos pendientes cada 10 minutos.
+        $schedule->call(function () {
+           Payment::checkPendingPayments();
+        })->everyTenMinutes();
     }
 
     /**

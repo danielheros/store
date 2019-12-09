@@ -135,10 +135,10 @@ class Payment extends Model
 
   /**
   * Consulta el estado de un pago
-  * @param int $paymentReference
+  * @param object $payment
   */
   public function checkPayment($payment)
-    {
+  {
 
       try {
 
@@ -211,6 +211,37 @@ class Payment extends Model
         return false;
       }
 
+
+
+    }
+
+
+    /**
+    * Consulta el estado de los pagos pendientes
+    */
+    public function checkPendingPayments()
+    {
+
+      try {
+
+        // Se obtienen los pagos pendientes
+        $pendingPayments = Payment::where('platform_status', Constant::PAYMENT_STATUS_PENDING)
+                                  ->whereNotNull('payment_code')
+                                  ->get();
+
+
+        if($pendingPayments->count()){
+
+          // Se recorren los pagos consultando su estado
+          foreach ($pendingPayments as $pendingPayment) {
+            Payment::checkPayment($pendingPayment);
+          }
+
+        }
+
+      } catch (\Exception $e) {
+        \Log::info( $e );
+      }
 
 
     }
