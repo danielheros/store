@@ -22,6 +22,7 @@ class CreatePaymentsTable extends Migration
           $table->string("platform_status")->nullable();
           $table->string('ip', 20);
           $table->string('payment_code')->nullable();
+          $table->dateTime('payment_date')->nullable();
           $table->longText('payment_response')->nullable();
           $table->longText('process_url')->nullable();
           $table->timestamps();

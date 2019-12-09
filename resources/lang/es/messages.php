@@ -20,6 +20,8 @@ return [
   'generic_error' => 'Ha ocurrido un error, por favor vuelve a intentarlo.',
   'resume_order' => 'Resumen del pedido',
   'value' => 'Valor',
-  'make_payment' => 'Realizar pago'
+  'make_payment' => 'Realizar pago',
+  'pending_payment_info' => 'El pago se encuentra en proceso de aprobación.',
+  'approved_payment_info' => 'El pago se realizó correctamente.',
 
 ];

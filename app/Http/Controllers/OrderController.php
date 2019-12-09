@@ -146,4 +146,47 @@ class OrderController extends Controller
 
 
 
+    /**
+     * Check payment status.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function checkPayment(Request $request, $id)
+    {
+
+        try {
+
+            // Se obtiene el pago a consultar
+            $payment = Payment::where('order_id', $id)
+                              ->where('platform_status', Constant::PAYMENT_STATUS_PENDING)
+                              ->whereNotNull('payment_code')
+                              ->first();
+
+            if($payment){
+
+                // Se consulta el estado de pago en la pasarela de pagos
+                $response = Payment::checkPayment($payment);
+
+                if($response){
+                    return redirect( 'orders' )->with( 'success', __('messages.approved_payment_info') );
+                }else{
+                    return redirect( 'orders' )->with( 'warning', __('messages.pending_payment_info') );
+                }
+
+
+              }
+
+
+        } catch (\Exception $e) {
+            \Log::info( $e );
+            return redirect( 'orders' )->with( 'warning', __('messages.pending_payment_info') );
+        }
+
+
+    }
+
+
+
 }

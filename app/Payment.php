@@ -50,6 +50,7 @@ class Payment extends Model
       $payment->order_id = $order->id;
       $payment->amount = Constant::ORDER_VALUE_DEFAULT;
       $payment->currency = Constant::ORDER_CURRENCY_DEFAULT;
+      $payment->platform_status = Constant::PAYMENT_STATUS_PENDING;
       $payment->ip = $request->ip();
 
       if($payment->save()){
@@ -81,7 +82,7 @@ class Payment extends Model
                 'mobile' => $payment->order->customer_mobile,
             ],
             'expiration' => date('c', strtotime('+1 hour')),
-            'returnUrl' =>  'http://localhost:8000/orders',
+            'returnUrl' =>  env('APP_URL') . '/orders/' . $payment->order_id . '/checkPayment',
             'ipAddress' => '127.0.0.1',
             'userAgent' => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36',
         ];
@@ -103,7 +104,6 @@ class Payment extends Model
           //Se actualizan los campos del pago
           $payment->payment_code = $response->requestId();
           $payment->status = 1;
-          $payment->platform_status = $response->status()->message();
           $payment->process_url = $response->processUrl();
           $payment->save();
 
@@ -130,6 +130,88 @@ class Payment extends Model
 
 
   }
+
+
+  /**
+  * Consulta el estado de un pago
+  * @param int $paymentReference
+  */
+  public function checkPayment($payment)
+    {
+
+      try {
+
+        $paymentApproved = false;
+
+
+        /**
+        * Se crea la instancia para la conexión con
+        * Place to Pay
+        */
+        $placetopay = new \Dnetix\Redirection\PlacetoPay([
+          'login' => env('P2P_LOGIN'),
+          'tranKey' => env('P2P_TRANKEY'),
+          'url' => env('P2P_SERVICE_URL'),
+        ]);
+
+        //Se envía la petición
+        $response = $placetopay->query($payment->payment_code);
+
+        // La consulta se realizó correctamente
+        if ($response->isSuccessful()) {
+
+
+          if($response->payment){
+
+            // El pago se encuentra aprobado
+            if ($response->status()->isApproved()){
+
+              // Se actualiza la información del pago
+              $payment->platform_status = $response->status()->status();
+              $payment->payment_date = date("Y-m-d H:i:s", strtotime($response->status()->date()) );
+              $payment->payment_response = json_encode($response);
+              $payment->save();
+
+
+              //Se actualiza el estado de la orden
+              switch ($response->status()->status()) {
+
+                case Constant::PAYMENT_STATUS_APPROVED:
+                    $payment->order->status = Constant::ORDER_STATUS_PAYED;
+                    $payment->order->save();
+                  break;
+
+                case Constant::PAYMENT_STATUS_REJECTED:
+                    $payment->order->status = Constant::ORDER_STATUS_REJECTED;
+                    $payment->order->save();
+                  break;
+
+              }
+
+
+              $paymentApproved = true;
+
+            }
+
+
+          }else{
+            $paymentApproved = false;
+          }
+
+
+        }
+
+        return $paymentApproved;
+
+
+      } catch (\Exception $e) {
+        \Log::info( $e );
+        return false;
+      }
+
+
+
+    }
 
 
 }
